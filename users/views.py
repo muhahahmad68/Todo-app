@@ -23,12 +23,19 @@ class RegisterPage(FormView):
     success_url = reverse_lazy('tasks')
 
     def form_valid(self, form):
-        user = form.save()
-        if user is not None:
-            login(self.request, user)
+        try:
+            user = form.save()
+            if user is not None:
+                login(self.request, user)
+        except ValueError as e:
+            form.add_error(None, e.message)
+            raise self.form_invalid(form)
         return super(RegisterPage, self).form_valid(form)
 
-    def get(self, *args, **kwargs):
+    '''def get(self, *args, **kwargs):
         if self.request.user.is_authenticated:
             return redirect('tasks')
-        return super(RegisterPage, self).get(*args, **kwargs)
+        return super(RegisterPage, self).get(*args, **kwargs)'''
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
